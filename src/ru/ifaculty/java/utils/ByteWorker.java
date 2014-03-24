@@ -1,9 +1,9 @@
-package ru.ifaculty.java.utils;
-
 /**
  *	Author:		Kaleb(Sadalmalik) (i just use different nicknames :D, i'm Gleb)
  *	License:	http://www.wtfpl.net/txt/copying/
 **/
+
+package ru.ifaculty.java.utils;
 
 /**
  *	@author Глеб aka Kaleb(Sadalmalik)
