@@ -5,6 +5,15 @@
 
 package ru.ifaculty.java.utils;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedMap;
+
+import com.sun.javafx.collections.MappingChange.Map;
+
 /**
  *	@author Глеб aka Kaleb(Sadalmalik)
  *	
@@ -22,6 +31,16 @@ package ru.ifaculty.java.utils;
  *	После длительных экспериментов я выяснил что String заменяет ОДИН ЕДИНСТВЕННЫЙ БАЙТ
  *	152 -> 63
  *	ВСЕ ОСТАЛЬНЫЕ ОСТАЮТСЯ НЕИЗМЕННЫМИ!
+ *	
+ *	UPD:	Пока менял нижеследующий код тестов - строки внезапно начали убивать гораздо больше знаков.
+ *			Есть подозрение что это из-за перехода самих исходников на UTF-9
+ *			В любом случае даже при вписывании разных charset-ов всё равно какие-то байты убиваются
+ *
+ *	UPD(2):	Сделал глобальный тест всех доступных Charset-ов. Как оказалось, их ДОХРЕНА О_О
+ *			Тем не менее применение строк к бинарным данным всё равно недопустимо, а моя реализация
+ *			работы с байтовыми массивами всё равно даёт большую производительность.
+ *			...
+ *			Так что вся эта бодяга здесь остаётся чисто как теоретическое исследование.
  *	
  *	Это настоящий удар под дых! Это выше моего понимания XD
  *	И вот итог: я накатал класс для разделения байтового массива на подмассивы по другому байтовому массву.
@@ -48,78 +67,124 @@ package ru.ifaculty.java.utils;
 
 public class ByteWorker
 	{
-	public	static	void	main(String[]args)
+	public	static	String	hex( byte v )
 		{
-		byte[]dataA=new byte[256];
-		for( int i=0 ; i<256 ; i++ )
-			{
-			dataA[i]=(byte)i;
-			System.out.print( " " + i );
-			}
-		byte[]dataB = (new String( dataA )).getBytes() ;
-
+		final char[]x = "0123456789ABCDEF".toCharArray();
+		int t = (v<0?v+256:v);	return( x[t>>4] +""+ x[t&0xF] );
+		}
+	public	static	void	main(String[]args)	//	Это тесты для демонстрации
+		{
+		byte[] dataA, dataB;
+		byte[][]	dataC;
+		//	тесты String
 		System.out.println();
-		for( int i=0 ; i<256 ; i++ )
-			{
-			System.out.print( " " + (dataB[i]<0?dataB[i]+256:dataB[i]) );
-			}
-
+		System.out.println("Массовый тест всех Charset-ов");
 		System.out.println();
-		for( int i=0 ; i<256 ; i++ )
-			{
-			if( dataA[i] != dataB[i] )
-				System.out.println( dataA[i]+256 + " -> " + dataB[i] );
-			}
 
+		dataA=new byte[256];
+		for( int i=0 ; i<256 ; i++ )	{	dataA[i]=(byte)i;	}
+		
+		Entry<String, Charset>e;
+		Iterator<Entry<String, Charset>> iter = Charset.availableCharsets().entrySet().iterator();
+
+		int change=0;
+		int unavailable=0;
+		System.out.println( "	всего доступно:	" + Charset.availableCharsets().size() );
 		System.out.println();
 		
-		byte[]data1 = "   test    string    ".getBytes();
-		byte[]data2 = " +".getBytes();
+		while( iter.hasNext() )
+			{
+			e = iter.next();
+			System.out.println( "Charset	:	"+e.getKey() );
+			try	{
+				Charset ch = e.getValue();
+				dataB = (new String( dataA , ch )).getBytes( ch );
+				if( dataA.length != dataB.length )
+					{
+					System.out.println("	Charset изменяет размер знаков. Сравнение невозможно");
+					System.out.println();
+					}
+				else{
+					int counter=0;
+					for( int i=0, j=0 ; i<256 ; i++ )
+					if( dataA[i] != dataB[i] )
+						{
+						counter++;
+						System.out.print( "	[ " + hex(dataA[i]) + " -> " + hex(dataB[i]) + " ]" );	//	Выводим все отличия
+						if( j%16==15 )	System.out.println();
+						j++;
+						}
+					System.out.println();
+					System.out.println("	Charset изменяет "+counter+" знаков");
+					if( counter==0 )change++;
+					System.out.println();
+					}
+				}
+			catch( Exception U )
+				{
+				System.out.println("	Charset не поддерживается системой");
+				System.out.println();	unavailable++;
+				}
+			}
+		System.out.println();
+		System.out.println("Charset-ы, не меняющие знаки:	"+change);
+		System.out.println("Charset-ы, не поддерживаемые системой:	"+unavailable+" (ЧТО ОНИ ЗАБЫЛИ В СПИСКЕ?)");
+		System.out.println();
+		
+		
+		
+		//	Сравнение скорости работы String.split и моей реализации split
+		System.out.println();
+		System.out.println("Сравнение работы String.split и ByteWorker.split");
+		System.out.println();
 		
 		long t1, t2;
 		long dt1, dt2;
-		t1=System.nanoTime();
-		byte[][]data3 = split( data1 , data2 );
-		t2=System.nanoTime();
 		
+		String	strA = "   test  !  string    ";
+		String	strB = "!";
+		String	strC[];
+		
+		dataA = strA.getBytes();
+		dataB = strB.getBytes();
+		t1=System.nanoTime();
+		dataC = split( dataA , dataB );
+		t2=System.nanoTime();
 		System.out.println();
-		System.out.println("byte	"+data1.length);
-		System.out.println();	dt1=(t2-t1);
-		System.out.println("time	"+dt1);	
-		System.out.println("size	"+data3.length);
-		//*
-		for( int i=0 ; i<data3.length ; i++ )
+		System.out.println("ByteWorker.split");
+		System.out.println("byte	"+dataA.length);	dt1=(t2-t1);
+		System.out.println("time1	"+dt1);	
+		System.out.println("size	"+dataC.length);
+		
+		t1=System.nanoTime();
+		strC = strA.split( strB );
+		t2=System.nanoTime();
+		System.out.println();
+		System.out.println("String.split");
+		System.out.println("byte	"+strA.length());	dt2=(t2-t1);
+		System.out.println("time2	"+dt2);	
+		System.out.println("size	"+strC.length);
+		System.out.println();
+		System.out.println( "time2 / time1 = "+ ((double)dt2)/((double)dt1) );
+
+		System.out.println();
+		System.out.println();
+		
+		for( int i=0 ; i<dataC.length ; i++ )
 			{
 			System.out.println();
-			if( data3[i]==null ){	System.out.print(i+"	null ");	}
-			else{	System.out.print(i+"	");	for( int j=0 ; j<data3[i].length ; j++ )	System.out.print(data3[i][j]+" ");	}
-			
+			if( dataC[i]==null ){	System.out.print(i+"	null ");	}
+			else{	System.out.print(i+"	");	for( int j=0 ; j<dataC[i].length ; j++ )	System.out.print(dataC[i][j]+" ");	}
 			}
-		//*/
-		
 		System.out.println();
-		String inp = new String(data1);
-		String sep = new String(data2);
-		t1=System.nanoTime();
-		String[]out= inp.split(sep);
-		t2=System.nanoTime();
-		
-		System.out.println();	dt2=(t2-t1);
-		System.out.println("time	"+dt2);
-		System.out.println("size	"+out.length);
-		System.out.println();
-		System.out.println( ((double)dt2)/((double)dt1) );
-		//*
 		int i=0;
-		for( String s : out )
+		for( String s : strC )
 			{
 			System.out.println();
 			if( s==null ){	System.out.print(i+"	null ");	}
 			else{	System.out.print(i+"	");	byte[]x = s.getBytes(); for( int j=0 ; j<x.length ; j++ )	System.out.print(x[j]+" ");	}
 			i++;
 			}
-		//*/
-		
 		}
 
 	public	static	int	contains( byte[]input , byte[]search )
