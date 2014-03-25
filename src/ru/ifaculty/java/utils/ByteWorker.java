@@ -67,6 +67,7 @@ import com.sun.javafx.collections.MappingChange.Map;
 
 public class ByteWorker
 	{
+	//***  Тут специальные тесты всякого что под руку попалось   *************************************//
 	public	static	String	hex( byte v )
 		{
 		final char[]x = "0123456789ABCDEF".toCharArray();
@@ -186,7 +187,11 @@ public class ByteWorker
 			i++;
 			}
 		}
-
+	//************************************************************************************************//
+	
+	
+	
+	//***	Тут собственно полезная функциональность   ***********************************************//
 	public	static	int	contains( byte[]input , byte[]search )
 		{	return contains( input , search , 0 );	}
 	public	static	int	contains( byte[]input , byte[]search , int skip )
@@ -237,4 +242,5 @@ public class ByteWorker
 		}
 	public	static	void print( byte[]input )
 		{	for( byte c : input ) System.out.print( (int)c+" " );	System.out.println();	}
+	//************************************************************************************************//
 	}
