@@ -73,10 +73,9 @@ public class ByteWorker
 		final char[]x = "0123456789ABCDEF".toCharArray();
 		int t = (v<0?v+256:v);	return( x[t>>4] +""+ x[t&0xF] );
 		}
-	public	static	void	main(String[]args)	//	Это тесты для демонстрации
+	public	static	void	Charsets_Analize()
 		{
 		byte[] dataA, dataB;
-		byte[][]	dataC;
 		//	тесты String
 		System.out.println();
 		System.out.println("Массовый тест всех Charset-ов");
@@ -131,39 +130,43 @@ public class ByteWorker
 		System.out.println("Charset-ы, не меняющие знаки:	"+change);
 		System.out.println("Charset-ы, не поддерживаемые системой:	"+unavailable+" (ЧТО ОНИ ЗАБЫЛИ В СПИСКЕ?)");
 		System.out.println();
-		
-		
+		}
+	public	static	void	String_ByteWorker_compare()
+		{
+		byte[] dataA, dataB;
+		byte[][]	dataC;
 		
 		//	Сравнение скорости работы String.split и моей реализации split
 		System.out.println();
 		System.out.println("Сравнение работы String.split и ByteWorker.split");
 		System.out.println();
 		
-		long t1, t2;
+		long time;
 		long dt1, dt2;
 		
-		String	strA = "   test  !  string    ";
+		String	strA = "   test  !  string   ! ololololololo ";
 		String	strB = "!";
 		String	strC[];
 		
 		dataA = strA.getBytes();
 		dataB = strB.getBytes();
-		t1=System.nanoTime();
+		
+		time=System.nanoTime();
 		dataC = split( dataA , dataB );
-		t2=System.nanoTime();
+		dt1=System.nanoTime()-time;
 		System.out.println();
 		System.out.println("ByteWorker.split");
-		System.out.println("byte	"+dataA.length);	dt1=(t2-t1);
-		System.out.println("time1	"+dt1);	
+		System.out.println("byte	"+dataA.length);	
+		System.out.println("time	"+dt1);	
 		System.out.println("size	"+dataC.length);
 		
-		t1=System.nanoTime();
+		time=System.nanoTime();
 		strC = strA.split( strB );
-		t2=System.nanoTime();
+		dt2=System.nanoTime()-time;
 		System.out.println();
 		System.out.println("String.split");
-		System.out.println("byte	"+strA.length());	dt2=(t2-t1);
-		System.out.println("time2	"+dt2);	
+		System.out.println("byte	"+strA.length());
+		System.out.println("time	"+dt2);	
 		System.out.println("size	"+strC.length);
 		System.out.println();
 		System.out.println( "time2 / time1 = "+ ((double)dt2)/((double)dt1) );
@@ -171,21 +174,16 @@ public class ByteWorker
 		System.out.println();
 		System.out.println();
 		
-		for( int i=0 ; i<dataC.length ; i++ )
-			{
-			System.out.println();
-			if( dataC[i]==null ){	System.out.print(i+"	null ");	}
-			else{	System.out.print(i+"	");	for( int j=0 ; j<dataC[i].length ; j++ )	System.out.print(dataC[i][j]+" ");	}
-			}
+		}
+	public	static	void	main(String[]args)	//	Это тесты для демонстрации
+		{
 		System.out.println();
-		int i=0;
-		for( String s : strC )
-			{
-			System.out.println();
-			if( s==null ){	System.out.print(i+"	null ");	}
-			else{	System.out.print(i+"	");	byte[]x = s.getBytes(); for( int j=0 ; j<x.length ; j++ )	System.out.print(x[j]+" ");	}
-			i++;
-			}
+		Charsets_Analize();
+		System.out.println();
+		System.out.println();
+		System.out.println();
+		String_ByteWorker_compare();
+		System.out.println();
 		}
 	//************************************************************************************************//
 	
