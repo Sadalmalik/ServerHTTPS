@@ -2,7 +2,7 @@ package example;
 
 import java.util.HashMap;
 
-import ru.ifaculrt.java.comcon.console;
+import ru.ifaculty.java.console.console;
 import ru.ifaculty.java.http.HTTPSServerStarter;
 import ru.ifaculty.java.http.Handler;
 import ru.ifaculty.java.http.httpContext;

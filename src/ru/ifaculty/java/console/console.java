@@ -1,4 +1,4 @@
-package ru.ifaculrt.java.comcon;
+package ru.ifaculty.java.console;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -9,7 +9,7 @@ import java.util.TreeMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import ru.ifaculrt.java.comcon.console.Action;
+import ru.ifaculty.java.console.console.Action;
 
 public class console implements Runnable
 	{
