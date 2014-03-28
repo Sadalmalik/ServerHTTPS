@@ -23,10 +23,8 @@ public class Krypto
 	
 	//************************************************************************************************//
 	private static byte[] DPOS = ("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ").getBytes();
-	public static String generateKey( int LEN )
-		{	return( generateKey( LEN , (byte[])null ) );	}
-	public static String generateKey( int LEN , String POS )
-		{	return( generateKey( LEN , POS.getBytes() ) );	}
+	public static String generateKey( int LEN )					{	return( generateKey( LEN , DPOS ) );	}
+	public static String generateKey( int LEN , String POS )	{	return( generateKey( LEN , POS.getBytes() ) );	}
 	public static String generateKey( int LEN , byte[] POS )
 		{
 		byte[]out=new byte[LEN];
@@ -66,7 +64,7 @@ public class Krypto
 		for(	 ;	i<data.length	;	i++	) data[i]='_';
 		
 		char[]hash=new char[len];
-		hash[0]=(char)0xFC;	//	îò áàëäû
+		hash[0]=(char)0xFC;	//	Ð¾Ñ‚ Ð±Ð°Ð»Ð´Ñ‹!
 		hash[1]=(char)0x5A;
 		hash[2]=(char)0x82;
 		for( i=3 ; i<len ; i++ )

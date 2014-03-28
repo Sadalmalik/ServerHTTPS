@@ -13,14 +13,20 @@ import ru.ifaculty.java.utils.config;
 public class HTTPSServerStarter
 	{
 	private	HTTPSServerStarter(){}
-
+	
 	public	static	void	start( Handler mainHandler , String configFile )
 		{
-		final ServerAbstract http__Serv;
-		final ServerAbstract https_Serv;
-		
-		HashMap<String,String>conf = config.load( configFile );
-		
+		start( mainHandler , config.load( configFile ) );
+		}
+	public	static	ServerAbstract	http__Serv;
+	public	static	ServerAbstract	https_Serv;
+	public	static	void	stop()
+		{
+		if( http__Serv!=null )	http__Serv.work=false;
+		if( https_Serv!=null )	https_Serv.work=false;
+		}
+	public	static	boolean	start( Handler mainHandler , HashMap<String,String>conf )
+		{
 		String	TMP		=	null	;
 		String	SECURE	=	null	;
 		String	IP		=	null	;
@@ -40,15 +46,17 @@ public class HTTPSServerStarter
 		int	Delay	=	-1	;
 		String	name=	null;
 		String	fold=	null;
+		String	temp=	null;
 		if( conf!=null )
 			{
 			if( (TMP=conf.get("TimeOut"))!=null )	TimeOut =	Integer.parseInt(TMP)	;
 			if( (TMP=conf.get("Delay"))!=null )		Delay	=	Integer.parseInt(TMP)	;
-			if( (TMP=conf.get("Delay"))!=null )		name	=	TMP						;
+			if( (TMP=conf.get("Name"))!=null )		name	=	TMP						;
 			if( (TMP=conf.get("RootFolder"))!=null )fold	=	TMP						;
+			if( (TMP=conf.get("TempFolder"))!=null )temp	=	TMP						;
 			}
 		
-		if( conf==null )						{	System.out.println("Can't create server! Need options file!");			return;	}
+		if( conf==null )						{	System.out.println("Can't create server! Need options file!");	return( false );	}
 
 		if( SECURE!=null )		https_Serv=new ServerHTTPS	(	IP	,	SPORT	,	SECURE	);
 		else					https_Serv=new ServerHTTPS	(	IP	,	SPORT	,	conf	);
@@ -57,6 +65,7 @@ public class HTTPSServerStarter
 		if( TimeOut>=0 )	{	https_Serv.setTimeout(TimeOut)	;	http__Serv.setTimeout(TimeOut)	;	}
 		if( Delay>=0 )		{	https_Serv.setDelay(Delay)		;	http__Serv.setDelay(Delay)		;	}
 		if( name!=null )	{	https_Serv.setServerName(name)	;	http__Serv.setServerName(name)	;	}
+		if( temp!=null )	{	inFile.SetFolder( temp );	}
 		
 		http__Serv.addHandler	(	new Handler()
 			{
@@ -83,5 +92,16 @@ public class HTTPSServerStarter
 		
 		_http__.start();
 		_https_.start();
+		
+		try {
+			Thread.sleep(10);
+			if( !http__Serv.work || !https_Serv.work )
+				{
+				http__Serv.work=https_Serv.work=false;
+				return( false );
+				}
+			}
+		catch (InterruptedException e)	{	e.printStackTrace();	}
+		return( true );
 		}
 	}

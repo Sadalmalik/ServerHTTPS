@@ -11,8 +11,17 @@ import java.util.regex.Pattern;
 
 public class inFile
 	{
-	public	static	final	String	folder		=	"temp/"	;
-	static	{	File f = new File( folder );	if( !f.isDirectory() )	f.mkdir();	}
+	private	static	String	folder		=	null	;
+	public	static	void	SetFolder( String name )
+		{
+		if( name!=null )
+			{
+			folder=name;
+			File f = new File( folder );
+			if( !f.isDirectory() )f.mkdir();
+			}
+		}
+	static	{	SetFolder("temp/");	}
 	public	static	final	Pattern	extension	=	Pattern.compile("(\\.\\w+)$")	;
 	public	inFile( String name , String mime )
 		{

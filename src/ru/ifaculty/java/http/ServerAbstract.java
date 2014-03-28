@@ -38,9 +38,9 @@ public abstract class ServerAbstract
 	
 
 	//************************************************************************************************//
-	protected ServerSocket		serv=null;
-	protected InetSocketAddress	addr=null;
-	protected boolean work=true;
+	protected	ServerSocket		serv=null;
+	protected	InetSocketAddress	addr=null;
+	protected	boolean				work=true;
 	
 	public ServerAbstract(int port)						{	addr = new InetSocketAddress(port);		}
 	public ServerAbstract(String ip, int port)			{	addr = new InetSocketAddress(ip,port);	}
@@ -49,12 +49,14 @@ public abstract class ServerAbstract
 	public		int		RPS=0;
 	protected	int		counter=0;
 	public		void	stop()	{	work = false;	}
+	protected	Thread	accompany = null;
 	public		void	start()
 		{
 		//	BLACK MAGIC
-		(new Thread( new Runnable(){public void run()
+		accompany = new Thread( new Runnable(){public void run()
 			{while(work){RPS=counter;counter=0;try{Thread.sleep(1000);}catch(Exception e){e.printStackTrace();}}}
-		} )).start();
+		});
+		accompany.start();
 
 		try	{
 			serv=createSocket();
